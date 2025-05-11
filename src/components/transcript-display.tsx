@@ -18,7 +18,7 @@ export function TranscriptDisplay({ transcript, videoId }: TranscriptDisplayProp
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(transcript);
+    navigator.clipboard.writeText(decodeHtmlEntities(transcript));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
