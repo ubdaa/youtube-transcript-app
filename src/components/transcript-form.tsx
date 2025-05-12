@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Badge } from "@/components/ui/badge";
 import { extractVideoId } from "@/lib/utils";
 import { TranscriptDisplay } from "./transcript-display";
-import { Loader2 } from "lucide-react";
+import { Loader2, Command } from "lucide-react";
 
 // Utility function to decode HTML entities
 function decodeHtmlEntities(text: string): string {
@@ -25,6 +26,29 @@ export function TranscriptForm() {
   const [videoId, setVideoId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isMac, setIsMac] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Detect OS on client-side
+  useEffect(() => {
+    setIsMac(navigator.userAgent.indexOf('Mac') !== -1);
+  }, []);
+
+  // Add keyboard shortcut listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Cmd+F (Mac) or Ctrl+F (Windows/Linux)
+      if ((isMac ? e.metaKey : e.ctrlKey) && e.key === 'k') {
+        e.preventDefault(); // Prevent default browser search
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMac]);
 
   const form = useForm<FormValues>({
     defaultValues: {
@@ -79,11 +103,22 @@ export function TranscriptForm() {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    {...field}
-                    disabled={loading}
-                  />
+                  <div className="relative">
+                    <Input
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      {...field}
+                      disabled={loading}
+                      ref={inputRef}
+                      className="pr-24" // Add padding to the right to make room for the badge
+                    />
+                    <Badge 
+                      variant="outline" 
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 gap-1 flex items-center"
+                    >
+                      <Command className="h-3 w-3" />
+                      <span>{isMac ? 'Cmd' : 'Ctrl'}+K</span>
+                    </Badge>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
