@@ -25,7 +25,7 @@ export function TranscriptDisplay({ transcript, videoId }: TranscriptDisplayProp
 
   return (
     <Card className="mt-6">
-      <CardContent className="pt-6">
+      <CardContent className="">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Transcription</h3>
           <div className="flex space-x-2">
